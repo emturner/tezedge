@@ -158,6 +158,7 @@ use crate::storage::{
     kv_cycle_meta, kv_operations,
 };
 
+use crate::baker::block_baker::*;
 use crate::baker::block_endorser::*;
 
 use crate::shutdown::{ShutdownInitAction, ShutdownPendingAction, ShutdownSuccessAction};
@@ -738,6 +739,29 @@ pub enum Action {
     BakerBlockEndorserEndorsementSignSuccess(BakerBlockEndorserEndorsementSignSuccessAction),
     BakerBlockEndorserEndorsementInjectPending(BakerBlockEndorserEndorsementInjectPendingAction),
     BakerBlockEndorserEndorsementInjectSuccess(BakerBlockEndorserEndorsementInjectSuccessAction),
+
+    BakerBlockBakerRightsGetInit(BakerBlockBakerRightsGetInitAction),
+    BakerBlockBakerRightsGetPending(BakerBlockBakerRightsGetPendingAction),
+    BakerBlockBakerRightsGetCurrentLevelSuccess(BakerBlockBakerRightsGetCurrentLevelSuccessAction),
+    BakerBlockBakerRightsGetNextLevelSuccess(BakerBlockBakerRightsGetNextLevelSuccessAction),
+    BakerBlockBakerRightsGetSuccess(BakerBlockBakerRightsGetSuccessAction),
+    BakerBlockBakerRightsNoRights(BakerBlockBakerRightsNoRightsAction),
+    BakerBlockBakerTimeoutPending(BakerBlockBakerTimeoutPendingAction),
+    BakerBlockBakerNextLevelTimeoutSuccessQuorumPending(
+        BakerBlockBakerNextLevelTimeoutSuccessQuorumPendingAction,
+    ),
+    BakerBlockBakerBakeNextLevel(BakerBlockBakerBakeNextLevelAction),
+    BakerBlockBakerBakeNextRound(BakerBlockBakerBakeNextRoundAction),
+    BakerBlockBakerPreapplyInit(BakerBlockBakerPreapplyInitAction),
+    BakerBlockBakerPreapplyPending(BakerBlockBakerPreapplyPendingAction),
+    BakerBlockBakerPreapplySuccess(BakerBlockBakerPreapplySuccessAction),
+    BakerBlockBakerComputeOperationsPathsInit(BakerBlockBakerComputeOperationsPathsInitAction),
+    BakerBlockBakerComputeOperationsPathsPending(
+        BakerBlockBakerComputeOperationsPathsPendingAction,
+    ),
+    BakerBlockBakerComputeOperationsPathsSuccess(
+        BakerBlockBakerComputeOperationsPathsSuccessAction,
+    ),
 
     ShutdownInit(ShutdownInitAction),
     ShutdownPending(ShutdownPendingAction),

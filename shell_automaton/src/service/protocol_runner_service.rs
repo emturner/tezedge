@@ -14,8 +14,9 @@ use slog::Logger;
 use tezos_api::environment::TezosEnvironmentConfiguration;
 use tezos_api::ffi::{
     ApplyBlockRequest, ApplyBlockResponse, BeginConstructionRequest, CommitGenesisResult,
-    InitProtocolContextResult, PrevalidatorWrapper, ProtocolRpcRequest, ProtocolRpcResponse,
-    TezosRuntimeConfiguration, ValidateOperationRequest, ValidateOperationResponse,
+    ComputePathRequest, ComputePathResponse, InitProtocolContextResult, PrevalidatorWrapper,
+    ProtocolRpcRequest, ProtocolRpcResponse, TezosRuntimeConfiguration, ValidateOperationRequest,
+    ValidateOperationResponse,
 };
 use tezos_context_api::{PatchContext, TezosContextStorageConfiguration};
 use tezos_messages::base::signature_public_key::{SignaturePublicKey, SignaturePublicKeyHash};
@@ -111,6 +112,13 @@ pub enum ProtocolRunnerResult {
         ),
     ),
 
+    ComputeOperationsPaths(
+        (
+            ProtocolRunnerToken,
+            Result<ComputePathResponse, ProtocolServiceError>,
+        ),
+    ),
+
     ShutdownServer(Result<(), ProtocolRunnerError>),
 }
 
@@ -129,6 +137,7 @@ impl ProtocolRunnerResult {
             Self::GetContextRawBytes((token, _)) => Some(*token),
             Self::GetEndorsingRights((token, _)) => Some(*token),
             Self::GetCycleDelegates((token, _)) => Some(*token),
+            Self::ComputeOperationsPaths((token, _)) => Some(*token),
 
             Self::ShutdownServer(_) => None,
         }
@@ -169,6 +178,8 @@ pub trait ProtocolRunnerService {
 
     fn get_latest_context_hashes(&mut self, count: i64) -> ProtocolRunnerToken;
 
+    // fn preapply_block(&mut self, req: ApplyBlockRequest);
+
     fn apply_block(&mut self, req: ApplyBlockRequest);
 
     // Prevalidator
@@ -183,6 +194,8 @@ pub trait ProtocolRunnerService {
     fn get_endorsing_rights(&mut self, req: ProtocolRpcRequest) -> ProtocolRunnerToken;
 
     fn get_cycle_delegates(&mut self, req: ProtocolRpcRequest) -> ProtocolRunnerToken;
+
+    fn compute_operations_paths(&mut self, req: ComputePathRequest) -> ProtocolRunnerToken;
 
     /// Notify status of protocol runner's and it's context initialization.
     fn notify_status(&mut self, initialized: bool);
@@ -363,6 +376,15 @@ impl ProtocolRunnerService for ProtocolRunnerServiceDefault {
     fn get_cycle_delegates(&mut self, req: ProtocolRpcRequest) -> ProtocolRunnerToken {
         let token = self.new_token();
         let message = ProtocolMessage::GetCycleDelegates(req);
+        self.channel
+            .blocking_send(ProtocolRunnerRequest::Message((token, message)))
+            .unwrap();
+        token
+    }
+
+    fn compute_operations_paths(&mut self, req: ComputePathRequest) -> ProtocolRunnerToken {
+        let token = self.new_token();
+        let message = ProtocolMessage::ComputePathCall(req);
         self.channel
             .blocking_send(ProtocolRunnerRequest::Message((token, message)))
             .unwrap();
